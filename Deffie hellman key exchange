@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <math.h>
+// Function to calculate modular exponentiation (base^exp mod mod)
+int mod_exp(int base, int exp, int mod) {
+ int result = 1;
+ base = base % mod;
+ while (exp > 0) {
+ if (exp % 2 == 1)
+ result = (result * base) % mod;
+ exp = exp / 2;
+ base = (base * base) % mod;
+ }
+ return result;
+}
+// Function to perform Diffie-Hellman key exchange and return public key
+int diffie_hellman(int prime, int primitive_root, int private_key) {
+ // Calculate public key: public_key = primitive_root^private_key mod prime
+ return mod_exp(primitive_root, private_key, prime);
+}
+int main() {
+ // Shared prime number and primitive root
+ int prime = 23;
+ int primitive_root = 5;
+ // Private keys for Alice and Bob
+ int private_key_alice = 6; // Chosen randomly
+ int private_key_bob = 15; // Chosen randomly
+ printf("Diffie-Hellman Key Exchange\n\n");
+ printf("Alice's Private Key: %d\n", private_key_alice);
+ int public_key_alice = diffie_hellman(prime, primitive_root, private_key_alice);
+ printf("Alice's Public Key: %d\n", public_key_alice);
+ printf("\nBob's Private Key: %d\n", private_key_bob);
+ int public_key_bob = diffie_hellman(prime, primitive_root, private_key_bob);
+ printf("Bob's Public Key: %d\n", public_key_bob);
+ // Calculate shared secret keys
+ int secret_key_alice = mod_exp(public_key_bob, private_key_alice, prime);
+ int secret_key_bob = mod_exp(public_key_alice, private_key_bob, prime);
+ printf("\nShared Secret Key (Alice): %d\n", secret_key_alice);
+ printf("Shared Secret Key (Bob): %d\n", secret_key_bob);
+ return 0;
+}
