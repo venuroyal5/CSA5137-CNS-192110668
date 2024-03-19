@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#define SIZE 5
+// Function to generate the Playfair matrix
+void generatePlayfairMatrix(const char *key, char matrix[SIZE][SIZE]) { char alphabet[26] = "abcdefghiklmnopqrstuvwxyz"; // No 'j' in Playfair cipher int key_len = strlen(key);
+ int index = 0;
+ // Fill the matrix with the key
+ for (int i = 0; i < key_len; ++i) {
+ if (key[i] != 'j') {
+ matrix[index / SIZE][index % SIZE] = key[i];
+ alphabet[key[i] - 'a'] = ' ';
+ index++;
+ }
+ }
+ // Fill the matrix with the remaining alphabet
+ for (int i = 0; i < 26; ++i) {
+ if (alphabet[i] != ' ') {
+ matrix[index / SIZE][index % SIZE] = alphabet[i];
+ index++;
+ }
+ }
+}
+// Function to find the positions of a character in the Playfair matrix
+void findPosition(const char matrix[SIZE][SIZE], char ch, int *row, int *col) { if (ch == 'j')
+ ch = 'i';
+ for (int i = 0; i < SIZE; ++i) {
+ for (int j = 0; j < SIZE; ++j) {
+ if (matrix[i][j] == ch) {
+ *row = i;
+ *col = j;
+ return;
+ }
+ }
+ }
+}
+// Function to encrypt a pair of characters using Playfair cipher
+void encryptPair(const char matrix[SIZE][SIZE], char a, char b, char *cipher) { int row1, col1, row2, col2;
+ findPosition(matrix, a, &row1, &col1);
+ findPosition(matrix, b, &row2, &col2);
+ if (row1 == row2) {
+ cipher[0] = matrix[row1][(col1 + 1) % SIZE];
+ cipher[1] = matrix[row2][(col2 + 1) % SIZE];
+ } else if (col1 == col2) {
+ cipher[0] = matrix[(row1 + 1) % SIZE][col1];
+ cipher[1] = matrix[(row2 + 1) % SIZE][col2];
+ } else {
+ cipher[0] = matrix[row1][col2];
+ cipher[1] = matrix[row2][col1];
+ }
+}
+// Function to perform Playfair encryption
+void playfair_encrypt(const char *plaintext, const char *key, char *ciphertext) { char matrix[SIZE][SIZE];
+ generatePlayfairMatrix(key, matrix);
+ int len = strlen(plaintext);
+ int index = 0;
+ for (int i = 0; i < len; i += 2) {
+ char a = plaintext[i];
+ char b = (i + 1 < len) ? plaintext[i + 1] : 'x'; // Pad 'x' if plaintext length is
+odd
+ encryptPair(matrix, a, b, &ciphertext[index]);
+ index += 2;
+ }
+ ciphertext[index] = '\0';
+}
+int main() {
+ char plaintext[1000];
+ char key[100];
+ printf("Enter the message to be encrypted: ");
+ fgets(plaintext, sizeof(plaintext), stdin);
+ // Remove trailing newline from input
+ plaintext[strcspn(plaintext, "\n")] = '\0';
+ printf("Enter the key: ");
+ scanf("%s", key);
+ char ciphertext[1000];
+ playfair_encrypt(plaintext, key, ciphertext);
+ printf("Encrypted message: %s\n", ciphertext);
+ return 0;
+}
