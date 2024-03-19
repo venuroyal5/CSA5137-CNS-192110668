@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+// RC4 State
+typedef struct {
+ uint8_t s[256];
+ uint8_t i;
+ uint8_t j;
+} RC4State;
+// RC4 Key Setup
+void rc4_key_setup(RC4State *state, const uint8_t *key, size_t key_length) {
+ // Initialize state array
+ for (int i = 0; i < 256; i++) {
+ state->s[i] = i;
+ }
+
+ // Permute state array based on the key
+ uint8_t j = 0;
+ for (int i = 0; i < 256; i++) {
+ j = (j + state->s[i] + key[i % key_length]) % 256;
+ uint8_t temp = state->s[i];
+ state->s[i] = state->s[j];
+ state->s[j] = temp;
+ }
+
+ // Reset indices
+ state->i = 0;
+ state->j = 0;
+}
+// RC4 Pseudorandom Generation Algorithm (PRGA)
+uint8_t rc4_prga(RC4State *state) {
+ state->i = (state->i + 1) % 256;
+ state->j = (state->j + state->s[state->i]) % 256;
+
+ // Swap s[i] and s[j]
+ uint8_t temp = state->s[state->i];
+ state->s[state->i] = state->s[state->j];
+ state->s[state->j] = temp;
+
+ return state->s[(state->s[state->i] + state->s[state->j]) % 256];
+}
+// RC4 Encrypt or Decrypt Message
+void rc4_crypt(const uint8_t *input, size_t input_length, const uint8_t *key, size_t key_length,
+uint8_t *output) {
+ RC4State state;
+ rc4_key_setup(&state, key, key_length);
+
+ for (size_t k = 0; k < input_length; k++) {
+ output[k] = input[k] ^ rc4_prga(&state);
+ }
+}
+int main() {
+ // Example key and message
+ const uint8_t key[] = "SecretKey";
+ const uint8_t plaintext[] = "Hello, world!";
+ const size_t plaintext_length = strlen((char *)plaintext);
+
+ // Buffer for ciphertext
+ uint8_t ciphertext[plaintext_length];
+
+ // Encrypt plaintext
+ rc4_crypt(plaintext, plaintext_length, key, strlen((char *)key), ciphertext);
+
+ // Print ciphertext
+ printf("Ciphertext: ");
+ for (size_t i = 0; i < plaintext_length; i++) {
+ printf("%02X ", ciphertext[i]);
+ }
+ printf("\n");
+
+ // Decrypt ciphertext
+ uint8_t decrypted_plaintext[plaintext_length];
+ rc4_crypt(ciphertext, plaintext_length, key, strlen((char *)key), decrypted_plaintext);
+
+ // Print decrypted plaintext
+ printf("Decrypted Plaintext: %s\n", decrypted_plaintext);
+
+ return 0;
+}
