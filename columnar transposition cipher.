@@ -1,0 +1,73 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+// Function to encrypt the message using columnar transposition cipher
+void encrypt(char *plaintext, char *key, char *ciphertext) {
+ int keyLength = strlen(key);
+ int plaintextLength = strlen(plaintext);
+ int numRows = (plaintextLength + keyLength - 1) / keyLength;
+ char grid[numRows][keyLength];
+ // Fill the grid with plaintext characters
+ int index = 0;
+ for (int i = 0; i < numRows; i++) {
+ for (int j = 0; j < keyLength; j++) {
+ if (index < plaintextLength)
+ grid[i][j] = plaintext[index++];
+ else
+ grid[i][j] = ' ';
+ }
+ }
+ // Rearrange the columns according to the key
+ for (int i = 0; i < keyLength; i++) {
+ for (int j = 0; j < keyLength; j++) {
+ if (key[j] == '1' + i) {
+ for (int k = 0; k < numRows; k++) {
+ ciphertext[i * numRows + k] = grid[k][j];
+ }
+ break;
+ }
+ }
+ }
+ ciphertext[plaintextLength] = '\0';
+}
+// Function to decrypt the message using columnar transposition cipher
+void decrypt(char *ciphertext, char *key, char *decryptedText) {
+ int keyLength = strlen(key);
+ int ciphertextLength = strlen(ciphertext);
+ int numRows = (ciphertextLength + keyLength - 1) / keyLength;
+ char grid[numRows][keyLength];
+ // Rearrange the columns according to the key
+ int index = 0;
+ for (int i = 0; i < keyLength; i++) {
+ for (int j = 0; j < keyLength; j++) {
+ if (key[j] == '1' + i) {
+ for (int k = 0; k < numRows; k++) {
+ grid[k][j] = ciphertext[index++];
+ }
+ break;
+ }
+ }
+ }
+ // Read the grid to get the decrypted text
+ index = 0;
+ for (int i = 0; i < numRows; i++) {
+ for (int j = 0; j < keyLength; j++) {
+ decryptedText[index++] = grid[i][j];
+ }
+ }
+ decryptedText[ciphertextLength] = '\0';
+}
+int main() {
+ char plaintext[100], key[100], ciphertext[100], decryptedText[100];
+ printf("Enter the plaintext: ");
+ fgets(plaintext, sizeof(plaintext), stdin);
+ plaintext[strcspn(plaintext, "\n")] = 0;
+ printf("Enter the key: ");
+ fgets(key, sizeof(key), stdin);
+ key[strcspn(key, "\n")] = 0;
+ encrypt(plaintext, key, ciphertext);
+ printf("Encrypted text: %s\n", ciphertext);
+ decrypt(ciphertext, key, decryptedText);
+ printf("Decrypted text: %s\n", decryptedText);
+ return 0;
+}
