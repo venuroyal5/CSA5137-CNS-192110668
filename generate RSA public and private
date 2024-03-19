@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <stdint.h>
+// Modular exponentiation
+uint64_t mod_exp(uint64_t base, uint64_t exp, uint64_t mod) {
+uint64_t result = 1;
+while (exp > 0) {
+if (exp % 2 == 1)
+result = (result * base) % mod;
+base = (base * base) % mod;
+exp /= 2;
+}
+return result;
+}
+// RSA encryption
+uint64_t rsa_encrypt(uint64_t plaintext, uint64_t e, uint64_t n) {
+return mod_exp(plaintext, e, n);
+}
+// RSA decryption
+uint64_t rsa_decrypt(uint64_t ciphertext, uint64_t d, uint64_t n) {
+return mod_exp(ciphertext, d, n);
+}
+int main() {
+// Public key components (e, n)
+uint64_t e = 65537; // Commonly used value
+uint64_t n = 3233; // Example modulus for demonstration
+// Private key component (d)
+uint64_t d = 937; // Example private exponent for demonstration
+// Plaintext message
+uint64_t plaintext = 123;
+// Encryption
+uint64_t ciphertext = rsa_encrypt(plaintext, e, n);
+printf("Ciphertext: %llu\n", ciphertext);
+// Decryption
+uint64_t decrypted = rsa_decrypt(ciphertext, d, n);
+printf("Decrypted: %llu\n", decrypted);
+return 0;
