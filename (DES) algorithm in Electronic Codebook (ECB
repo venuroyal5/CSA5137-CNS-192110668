@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <string.h>
+#define BLOCK_SIZE 8
+#define KEY_SIZE 8
+void des_ecb(unsigned char *plaintext, unsigned char *key, unsigned char *ciphertext);
+void des_cbc(unsigned char *plaintext, unsigned char *key, unsigned char *iv, unsigned char
+*ciphertext);
+void des_cfb(unsigned char *plaintext, unsigned char *key, unsigned char *iv, unsigned char
+*ciphertext);
+int main() {
+ unsigned char plaintext[BLOCK_SIZE + 1];
+ unsigned char key[KEY_SIZE + 1];
+ unsigned char iv[BLOCK_SIZE + 1];
+ unsigned char ciphertext[BLOCK_SIZE + 1];
+ char mode;
+ printf("Enter plaintext (8 characters): ");
+ scanf("%8s", plaintext);
+ printf("Enter key (8 characters): ");
+ scanf("%8s", key);
+ printf("Enter mode of operation (E - ECB, C - CBC, F - CFB): ");
+ scanf(" %c", &mode); // Added space before %c to consume newline
+ if (mode == 'C' || mode == 'F') {
+ printf("Enter IV (8 characters): ");
+ scanf("%8s", iv);
+ }
+ switch (mode) {
+ case 'E':
+ des_ecb(plaintext, key, ciphertext);
+ break;
+ case 'C':
+ des_cbc(plaintext, key, iv, ciphertext);
+ break;
+ case 'F':
+ des_cfb(plaintext, key, iv, ciphertext);
+ break;
+ default:
+ printf("Invalid mode specified.\n");
+ return 1;
+ }
+ printf("Ciphertext: %s\n", ciphertext);
+ return 0;
+}
+void des_ecb(unsigned char *plaintext, unsigned char *key, unsigned char *ciphertext) {
+ // Implement DES in ECB mode
+}
+void des_cbc(unsigned char *plaintext, unsigned char *key, unsigned char *iv, unsigned char
+*ciphertext) {
+ // Implement DES in CBC mode
+}
+void des_cfb(unsigned char *plaintext, unsigned char *key, unsigned char *iv, unsigned char
+*ciphertext) {
+ // Implement DES in CFB mode
+}
